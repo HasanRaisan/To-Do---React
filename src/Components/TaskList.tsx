@@ -1,5 +1,5 @@
 import Task from "./Task"
-import {  useState, useEffect , useContext} from "react"
+import {  useState, useEffect , useContext, useMemo, use} from "react"
 import { TasksListContext } from "../Contexts/TasksListData"
 import type { TasksListDataProps } from "../Data/TasksListData"
 
@@ -36,14 +36,17 @@ setTasks (storageTodos);
   }
 
 
-  let filteredTasks;
-  if (filter === 'completed') {
-    filteredTasks = tasksState?.filter(task => task.completed === true);
-  } else if (filter === 'incomplete') {
-    filteredTasks = tasksState?.filter(task => task.completed === false);
-  } else {
-    filteredTasks = tasksState;
-  }
+  const filteredTasks =  useMemo(() => {
+    console.log("Filtering tasks");
+      if (filter === 'completed') 
+    return tasksState?.filter(task => task.completed === true);
+   else if (filter === 'incomplete') 
+    return tasksState?.filter(task => task.completed === false);
+   else 
+    return tasksState;
+  
+  }, [tasksState, filter]);
+
 
 
 
