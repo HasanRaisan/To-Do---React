@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ar">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>To-Do List Screen Variant 5</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#313c98",
+                        "background-light": "#f0f2f5",
+                        "background-dark": "#121212",
+                        "card-light": "#ffffff",
+                        "card-dark": "#1e1e1e",
+                        "text-light": "#1c1e21",
+                        "text-dark": "#e4e6eb",
+                        "text-secondary-light": "#65676b",
+                        "text-secondary-dark": "#b0b3b8",
+                        "success": "#4caf50",
+                        "danger": "#e53e3e",
+                        "icon-bg-light": "#e4e6eb",
+                        "icon-bg-dark": "#3a3b3c"
+                    },
+                    fontFamily: {
+                        display: ["Roboto", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.75rem", // 12px
+                        'lg': '1rem', // 16px
+                        'xl': '1.5rem' // 24px
+                    },
+                },
+            },
+        };
+    </script>
+<style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            min-height: max(884px, 100dvh);
+        }
+        .material-icons {
+            font-feature-settings: 'liga';
+        }
+    </style>
+<style>
+    body {
+      min-height: max(1400px, 100dvh);
+    }
+  </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
