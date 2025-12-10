@@ -1,11 +1,13 @@
 import Task from "./Task"
-import {  useState, useEffect , useContext, useMemo, use} from "react"
+import {  useState, useEffect , useContext, useMemo } from "react"
 import { TasksListContext } from "../Contexts/TasksListData"
 import type { TasksListDataProps } from "../Data/TasksListData"
+import { useToast } from "../Contexts/ToastContext";
+
 
 const TaskList = () => {
   const {tasksState, setTasks} = useContext(TasksListContext);
-
+  const toast = useToast();
 
 useEffect(() => {
 console.log("calling use effect");
@@ -14,17 +16,17 @@ setTasks (storageTodos);
 }, []);
 
 
-
   const [filter, setFilter] = useState<'all' | 'completed' | 'incomplete'>('all');
   
 
-
   
   const [newTask, setNewTask] =  useState<{title: string, time: string}>({title: '', time: ''});
+  const [taskToDelete, setTaskToDelete] = useState<TasksListDataProps | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   function handleAddTask() {
     const newTaskToAdd : TasksListDataProps = {
-      id: tasksState && tasksState.length > 0 ? Math.max(...tasksState.map(t => t.id)) + 1 : 1,
+      id: tasksState && tasksState.length > 0 ? Math.max(...(tasksState as TasksListDataProps[]).map(t => t.id)) + 1 : 1,
       title: newTask.title,
       time: newTask.time,
       completed: false
@@ -33,17 +35,43 @@ setTasks (storageTodos);
     setTasks(updatedTasks);
     localStorage.setItem("tasks", JSON.stringify(updatedTasks));
     setNewTask({title: '', time: ''});
+    toast?.showToast("تمت إضافة المهمة بنجاح!");
+  }
+
+  function handleDeleteTask(taskId: number) {
+    const updatedTasks = (tasksState as TasksListDataProps[] | undefined)?.filter(task => task.id !== taskId);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    setTasks(updatedTasks as any);
+    localStorage.setItem("tasks", JSON.stringify(updatedTasks));
+    toast?.showToast("تم حذف المهمة بنجاح!");
+  }
+
+  function openDeleteDialog(task: TasksListDataProps) {
+    setTaskToDelete(task);
+    setShowDeleteConfirm(true);
+  }
+
+  function closeDeleteDialog() {
+    setShowDeleteConfirm(false);
+    setTaskToDelete(null);
+  }
+
+  function confirmDelete() {
+    if (taskToDelete) {
+      handleDeleteTask(taskToDelete.id);
+    }
+    closeDeleteDialog();
   }
 
 
   const filteredTasks =  useMemo(() => {
     console.log("Filtering tasks");
       if (filter === 'completed') 
-    return tasksState?.filter(task => task.completed === true);
-   else if (filter === 'incomplete') 
-    return tasksState?.filter(task => task.completed === false);
-   else 
-    return tasksState;
+    return (tasksState as TasksListDataProps[] | undefined)?.filter(task => task.completed === true);
+  else if (filter === 'incomplete') 
+    return (tasksState as TasksListDataProps[] | undefined)?.filter(task => task.completed === false);
+  else 
+    return tasksState as TasksListDataProps[] | undefined;
   
   }, [tasksState, filter]);
 
@@ -62,7 +90,6 @@ setTasks (storageTodos);
     }
   `;
 }
-
 
 
 
@@ -107,13 +134,48 @@ setTasks (storageTodos);
       
       {  
       filteredTasks?.map((task) => (
-          <Task key={task.id} taskData={task} />
+          <Task key={task.id} taskData={task} onDeleteClick={openDeleteDialog} />
       ))
     }
     
 
     </div>
-</main>
+    <dialog
+      open={showDeleteConfirm}
+    >
+      <div className="w-full max-w-[320px] overflow-hidden rounded-2xl bg-white dark:bg-[#1e2532] shadow-2xl ring-1 ring-black/5 dark:ring-white/10 transform scale-100 transition-all">
+        <div className="flex flex-col items-center p-6 text-center">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
+            <span className="material-symbols-outlined text-red-600 dark:text-red-500 text-[24px]">
+              حذف
+            </span>
+          </div>
+          <h3 className="mb-2 text-lg font-bold leading-6 text-gray-900 dark:text-white">
+            حذف المهمة
+          </h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+            هل أنت متأكد أنك تريد حذف المهمة
+            <span className="font-semibold text-gray-900 dark:text-white">
+              {" "}{taskToDelete?.title}{" "}
+
+            </span>
+            ؟ لن تتمكن من التراجع عن هذا الإجراء.
+          </p>
+        </div>
+        <div className="grid grid-cols-2 divide-x divide-gray-200 dark:divide-gray-700 border-t border-gray-200 dark:border-gray-700">
+          <button className="flex h-12 w-full items-center justify-center text-[15px] font-semibold text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-[#252b3b] active:bg-gray-100 dark:active:bg-[#2a3242] transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary rounded-bl-2xl"
+            onClick={closeDeleteDialog}>
+            الغاء 
+          </button>
+          <button className="flex h-12 w-full items-center justify-center text-[15px] font-bold text-red-600 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 active:bg-red-100 dark:active:bg-red-900/30 transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-red-500 rounded-br-2xl"
+            onClick={confirmDelete}>
+              حذف
+          </button>
+        </div>
+      </div>
+    </dialog>
+
+    </main>
 <footer className="pt-6 mt-auto">
     <div className="flex items-center space-x-3 space-x-reverse">
     <input
