@@ -93,7 +93,7 @@ const TaskList = () => {
 
 
   return (
-    <div className="min-h-screen max-w-md mx-auto flex flex-col p-4 bg-card-light dark:bg-card-dark">
+    <div className="h-screen max-w-md mx-auto flex flex-col p-4 bg-card-light dark:bg-card-dark overflow-hidden">
   <header className="py-8">
     <h1 className="text-6xl font-black text-center text-text-light dark:text-text-dark">
       مهامي
@@ -103,7 +103,7 @@ const TaskList = () => {
       <span className="w-3 h-3 bg-text-light dark:bg-text-dark rounded-full mx-1" />
     </div>
   </header>
-  <main className="flex-grow">
+  <main className="flex-grow overflow-y-auto">
     <div className="flex justify-center items-center p-1 rounded-md border border-border-light dark:border-border-dark mb-6 text-sm"  style={{direction : 'rtl'}}  
     >
       <button className= {tabClasses(filter === 'all')}
