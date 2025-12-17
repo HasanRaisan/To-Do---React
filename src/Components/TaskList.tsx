@@ -1,20 +1,19 @@
 import Task from "./Task"
-import {  useState, useEffect , useContext, useMemo } from "react"
-import { TasksListContext } from "../Contexts/TasksListData"
+import {  useState, useEffect , useMemo } from "react"
 import type { TasksListDataProps } from "../Data/TasksListData"
 import { useToast } from "../Contexts/ToastContext";
-
+import {v4 as uuidv4} from "uuid";
+import {useTasks} from "../Contexts/TasksContext"
 
 const TaskList = () => {
-  const {tasksState, setTasks} = useContext(TasksListContext);
+
+  const {tasksState, dispatch} = useTasks();
   const toast = useToast();
 
-useEffect(() => {
-console.log("calling use effect");
-const storageTodos =  JSON.parse(localStorage.getItem("tasks") || "[]");
-setTasks (storageTodos);
-}, []);
-
+  useEffect(() => {
+    console.log("Loading tasks from localStorage");
+    dispatch({type:"upload"});
+  }, []);
 
   const [filter, setFilter] = useState<'all' | 'completed' | 'incomplete'>('all');
   
@@ -24,25 +23,22 @@ setTasks (storageTodos);
   const [taskToDelete, setTaskToDelete] = useState<TasksListDataProps | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  function handleAddTask() {
-    const newTaskToAdd : TasksListDataProps = {
-      id: tasksState && tasksState.length > 0 ? Math.max(...(tasksState as TasksListDataProps[]).map(t => t.id)) + 1 : 1,
+  function handleAddTask()
+  {
+    const newTaskToAdd: TasksListDataProps = {
+      id: uuidv4(),
       title: newTask.title,
       time: newTask.time,
       completed: false
     };
-    const updatedTasks  = tasksState ? [...tasksState, newTaskToAdd] : [newTaskToAdd];
-    setTasks(updatedTasks);
-    localStorage.setItem("tasks", JSON.stringify(updatedTasks));
+    dispatch({type: "add", payload: {newTask: newTaskToAdd}});
     setNewTask({title: '', time: ''});
     toast?.showToast("تمت إضافة المهمة بنجاح!");
   }
 
-  function handleDeleteTask(taskId: number) {
-    const updatedTasks = (tasksState as TasksListDataProps[] | undefined)?.filter(task => task.id !== taskId);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    setTasks(updatedTasks as any);
-    localStorage.setItem("tasks", JSON.stringify(updatedTasks));
+
+  function handleDeleteTask(taskId: string) {
+    dispatch({type:"delete", payload:{taskId}})
     toast?.showToast("تم حذف المهمة بنجاح!");
   }
 
@@ -66,12 +62,12 @@ setTasks (storageTodos);
 
   const filteredTasks =  useMemo(() => {
     console.log("Filtering tasks");
-      if (filter === 'completed') 
-    return (tasksState as TasksListDataProps[] | undefined)?.filter(task => task.completed === true);
-  else if (filter === 'incomplete') 
-    return (tasksState as TasksListDataProps[] | undefined)?.filter(task => task.completed === false);
-  else 
-    return tasksState as TasksListDataProps[] | undefined;
+    if (filter === 'completed') 
+      return (tasksState as TasksListDataProps[] | undefined)?.filter(task => task.completed === true);
+    else if (filter === 'incomplete') 
+      return (tasksState as TasksListDataProps[] | undefined)?.filter(task => task.completed === false);
+     else 
+      return tasksState as TasksListDataProps[] | undefined;
   
   }, [tasksState, filter]);
 

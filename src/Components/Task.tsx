@@ -1,7 +1,7 @@
-import { useState, useContext } from "react";
+import { useState } from "react";
 import type { TasksListDataProps } from "../Data/TasksListData";
-import { TasksListContext } from "../Contexts/TasksListData"
 import { useToast } from "../Contexts/ToastContext";
+import { useTasks } from "../Contexts/TasksContext";
 
 type TaskProps = {
   taskData?: TasksListDataProps;
@@ -10,28 +10,17 @@ type TaskProps = {
 
 const Task = ({ taskData, onDeleteClick }: TaskProps) => {
 
-  const { tasksState, setTasks } = useContext(TasksListContext);
   const toast = useToast();
+  const {dispatch} = useTasks();
 
 
-  function handleCompleteTask(taskId: number, status: boolean) {
-    const updatedTasks = tasksState?.map(task => {
-      if (task.id === taskId) {
-        return { ...task, completed: status };
-      }
-      return task;
-    });
-    setTasks(updatedTasks);
-    localStorage.setItem("tasks", JSON.stringify(updatedTasks));
+  function handleCompleteTask(taskId: string, status: boolean) {
+    dispatch({type: "complete", payload: {taskId, status}})
     toast?.showToast(status ? "تم اكمال المهمة!" : "تم وضع المهمة كغير مكتملة!");
   }
 
-  function handleEditTask(taskId: number, newTitle: string, newTime: string) {
-    const updatedTasks = tasksState?.map(task =>
-      task.id === taskId ? { ...task, title: newTitle, time: newTime } : task
-    );
-    setTasks(updatedTasks);
-    localStorage.setItem("tasks", JSON.stringify(updatedTasks));
+  function handleEditTask(taskId: string, newTitle: string, newTime: string) {
+    dispatch({type: "update", payload:{taskId, newTitle, newTime}});
   }
 
   const [isEditing, setIsEditing] = useState(false);
